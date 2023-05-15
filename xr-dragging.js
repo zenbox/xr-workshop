@@ -30,20 +30,26 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { XRButton } from "three/addons/webxr/XRButton.js";
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 
+//Physics
 import { RapierPhysics } from "three/addons/physics/RapierPhysics.js";
 
 // Variablen für den Aufbau
 let cube1,
     cube2,
     cube3,
-    cube4,
+    cubes = [],
     group,
+    floor,
+    back,
+    left,
+    right,
     ambientLight,
     controller1,
     controller2,
     w = window.innerWidth,
     h = window.innerHeight;
 
+//Physics
 let physics, position;
 
 const clock = new THREE.Clock();
@@ -81,7 +87,7 @@ function addRenderer() {
     document.body.appendChild(XRButton.createButton(renderer));
 }
 function setSceneProperties() {
-    scene.background = new THREE.Color(0x000000);
+    scene.background = new THREE.Color(0xffffff);
     scene.add(axesHelper);
     scene.add(gridHelper);
     // scene.add(light);
@@ -113,12 +119,17 @@ function renderXrLoop() {
     intersectObjects(controller1);
     intersectObjects(controller2);
 
-    cube1.rotation.x += 0.005;
-    cube2.rotation.y += 0.005;
-    cube3.rotation.z += 0.005;
-    cube4.rotation.x += 0.005;
-    cube4.rotation.y += 0.005;
-    cube4.rotation.z += 0.005;
+    cubes.forEach((cube) => {
+        cube.rotation.x += 0.005 + Math.random() * 0.005;
+        cube.rotation.z += 0.005 + Math.random() * 0.005;
+        cube.rotation.x += 0.005 + Math.random() * 0.005;
+    });
+
+    /*cube1.rotation.x += 0.005;
+    cube1.rotation.y += 0.005;
+    cube1.rotation.z += 0.005;
+    cube2.rotation.z += 0.005;
+    cube3.rotation.y += 0.005;*/
 }
 // - - - - - - - - - -
 // Controller functions
@@ -231,55 +242,116 @@ function cleanIntersected() {
     }
 }
 // - - - - - - - - - -
+function addCubes() {
+    for (let i = 0; i <= 1000; i++) {
+        const geometry = new THREE.BoxGeometry(
+            Math.random() * 0.5,
+            Math.random() * 0.5,
+            Math.random() * 0.5
+        );
+
+        const material = new THREE.MeshPhongMaterial({
+            color: Math.random() * 0xff0000,
+        });
+
+        let cube = new THREE.Mesh(geometry, material);
+
+        cube.position.set(
+            -5 + Math.random() * 10,
+            3 + Math.random() * 2,
+            -4 + Math.random() * 8
+        );
+        cubes.push(cube);
+        group.add(cube);
+    }
+}
 function addCube1() {
     const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+    const material = new THREE.MeshPhongMaterial({ color: 0x00ff55 });
     let cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 0, 0);
+    cube.position.set(0, 5, -1);
     // scene.add(cube);
     group.add(cube);
     cube1 = cube;
 }
 function addCube2() {
     const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+    const material = new THREE.MeshPhongMaterial({ color: 0x00ff55 });
     let cube = new THREE.Mesh(geometry, material);
-    cube.position.set(-1, 0, 0);
+    cube.position.set(0, 4, -2);
     // scene.add(cube);
     group.add(cube);
     cube2 = cube;
 }
 function addCube3() {
     const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const material = new THREE.MeshPhongMaterial({ color: 0x0000ff });
+    const material = new THREE.MeshPhongMaterial({ color: 0x00ff55 });
     let cube = new THREE.Mesh(geometry, material);
-    cube.position.set(1, 0, 0);
+    cube.position.set(0, 3, -3);
     // scene.add(cube);
     group.add(cube);
     cube3 = cube;
-}
-function addCube4() {
-    const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff00ff });
-    let cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 2, 0);
-    scene.add(cube);
-    // group.add(cube);
-    cube4 = cube;
 }
 function addGroup() {
     group = new THREE.Group();
     scene.add(group);
 }
-// - - - - - - - - - -
-// PHYSICS
-// - - - - - - - - - -
+
+function addFloor() {
+    const geometry = new THREE.BoxGeometry(10, 0.5, 10);
+    const material = new THREE.MeshBasicMaterial({
+        color: 0x444444,
+    });
+    floor = new THREE.Mesh(geometry, material);
+    floor.position.x = 0;
+    //Boden neigen
+    floor.rotation.set(-0.3, 0, 0);
+    floor.receiveShadow = true;
+    scene.add(floor);
+}
+function addBack() {
+    const geometry = new THREE.BoxGeometry(10, 10, 0.5);
+    const material = new THREE.MeshBasicMaterial({
+        color: 0x444444,
+    });
+    back = new THREE.Mesh(geometry, material);
+    back.position.y = 5;
+    back.position.z = -4.7;
+    back.receiveShadow = true;
+    scene.add(back);
+}
+function addLeft() {
+    const geometry = new THREE.BoxGeometry(0.5, 10, 10);
+    const material = new THREE.MeshBasicMaterial({
+        color: 0xff0000,
+    });
+    left = new THREE.Mesh(geometry, material);
+    left.position.y = 5;
+    left.position.z = 0;
+    left.position.x = 5;
+    left.receiveShadow = true;
+    scene.add(left);
+}
+function addRight() {
+    const geometry = new THREE.BoxGeometry(0.5, 10, 10);
+    const material = new THREE.MeshBasicMaterial({
+        color: 0x00ff00,
+    });
+    right = new THREE.Mesh(geometry, material);
+    right.position.y = 5;
+    right.position.z = 0;
+    right.position.x = -5;
+    right.receiveShadow = true;
+    scene.add(right);
+}
+
+//Physics
 physics = await RapierPhysics();
 position = new THREE.Vector3();
 
-// - - - - - - - - - -
+// - - - - - - - - - - -
 // PROCESS
-// - - - - - - - - - -
+// - - - - - - - - - - -
 addCamera();
 addLights();
 addRenderer();
@@ -292,19 +364,29 @@ addController2();
 addGrip1();
 addGrip2();
 
+addFloor();
+addBack();
+addLeft();
+addRight();
+
 addGroup();
 addCube1();
 addCube2();
 addCube3();
-addCube4();
+addCubes();
 
-physics.addMesh(cube1, 1);
-physics.addMesh(cube2, 1);
-physics.addMesh(cube3, 1);
-physics.addMesh(cube4, 1);
-
+//Wände und Boden zu Physics hinzufügen
+physics.addMesh(floor);
+physics.addMesh(back);
+physics.addMesh(left);
+physics.addMesh(right);
+setTimeout(() => {
+    cubes.forEach((cube) => physics.addMesh(cube, 1));
+    physics.addMesh(cube1, 1);
+    physics.addMesh(cube2, 1);
+    physics.addMesh(cube3, 1);
+}, 5000);
 // - - - - - - - - - -
 // Always at the end
 // - - - - - - - - - -
-
 animate();

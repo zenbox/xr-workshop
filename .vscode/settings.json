@@ -1,0 +1,36 @@
+{
+    // EDITOR
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnType": true,
+
+    // LIVE SERVER
+    "liveServer.settings.port": 5504,
+
+    // LIVE SASS COMPILER
+    "liveSassCompile.settings.formats": [
+        {
+            "extensionName": ".css",
+            "format": "expanded",
+            "savePath": "/assets/css/"
+        }
+    ],
+    "liveSassCompile.settings.generateMap": false,
+    "liveSassCompile.settings.autoprefix": [],
+    "liveSassCompile.settings.excludeList": [
+        "**/node_modules/**",
+        ".vscode/**"
+    ],
+    "liveSassCompile.settings.includeItems": [],
+
+    // LIVE PUG COMPILER
+    "livePugCompiler.savePath": "/dist",
+
+    "liveServer.settings.https": {
+        "enable": true, //set it true to enable the feature.
+        "cert": "/Users/michaelreichart/server.crt", //full path of the certificate
+        "key": "/Users/michaelreichart/server.key", //full path of the private key
+        "passphrase": "Eg3szseg!"
+    }
+}
