@@ -32,7 +32,8 @@ const scene = studio._scene;
 const plot = new Plot(studio);
 const renderer = plot._renderer;
 
-const controller = new Controller(studio, plot);
+let group;
+const controller = new Controller(studio, plot, group);
 controller._update();
 
 const world = new CANNON.World();
@@ -42,7 +43,6 @@ world.solver.iterations = 16;
 
 // Variablen für den Aufbau
 let cubes = [],
-    group,
     floor,
     back,
     left,
@@ -106,10 +106,10 @@ function renderXrLoop() {
     // Render the image into the canvas object
     renderer.render(scene, studio.camera);
 
-    cleanIntersectedObjects();
+    controller._cleanIntersectedObjects();
 
-    intersectObjects(leftController);
-    intersectObjects(rightController);
+    controller._intersectObjects(controller._leftController);
+    controller._intersectObjects(controller._rightController);
 
     cubes.forEach((cube) => {
         cube.rotation.x += 0.005 + Math.random() * 0.005;

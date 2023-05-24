@@ -4,9 +4,10 @@ import { XRButton } from "three/addons/webxr/XRButton.js";
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 
 export default class Controller {
-    constructor(studio, plot) {
+    constructor(studio, plot, group) {
         this._studio = studio;
         this._plot = plot;
+        this._group = group;
         this._scene = this._studio._scene;
         this._initOrbitControl();
         this._initXrControl();
@@ -65,11 +66,11 @@ export default class Controller {
         this._scene.add(this._rightGrip);
     }
     _addMarker() {
-        let _marker = new THREE.Mesh(
+        this._marker = new THREE.Mesh(
             new THREE.CircleGeometry(0.25, 32).rotateX(-Math.PI / 2),
             new THREE.MeshBasicMaterial({ color: 0x808080 })
         );
-        this._scene.add(_marker);
+        this._scene.add(this._marker);
     }
     _onDragStart(event) {
         this.userData.isSelecting = true;
@@ -125,8 +126,8 @@ export default class Controller {
         document.body.appendChild(XRButton.createButton(this._renderer));
     }
     _getRaycasterIntersections(controller) {
-        let _drag = raycasterDrag,
-            _ray = raycasterDrag.ray,
+        let _drag = this._raycasterDrag,
+            _ray = this._raycasterDrag.ray,
             _matrix = controller.matrixWorld;
 
         // ? why?
@@ -134,14 +135,14 @@ export default class Controller {
 
         // Extract controller rotation fron the controller matrix
         // (relative to world)
-        tempMatrix.identity().extractRotation(_matrix);
+        this._tempMatrix.identity().extractRotation(_matrix);
 
         // Set the ray origin to controller matrix (position & rotation)
         // Set the ray direction (turn ray z into direction)
         _ray.origin.setFromMatrixPosition(_matrix);
-        _ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+        _ray.direction.set(0, 0, -1).applyMatrix4(this._tempMatrix);
 
-        return _drag.intersectObjects(group.children, false);
+        return this._intersectObjects(this._group.children, false);
     }
     _intersectObjects(controller) {
         // Nothing is selected, so idle
@@ -149,7 +150,7 @@ export default class Controller {
 
         // Is there an object named "line" in the controller?
         let _line = controller.getObjectByName("line"),
-            _intersections = getRaycasterIntersections(controller);
+            _intersections = this._getRaycasterIntersections(controller);
 
         // If there are any intersections
         if (_intersections.length > 0) {
@@ -172,8 +173,8 @@ export default class Controller {
         }
     }
     _cleanIntersectedObjects() {
-        while (intersectedObjects.length) {
-            let _object = intersectedObjects.pop();
+        while (this._intersectedObjects.length) {
+            let _object = this._intersectedObjects.pop();
             _object.material.emissive.r = 0;
         }
     }

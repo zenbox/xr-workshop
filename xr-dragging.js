@@ -296,7 +296,6 @@ function addGroup() {
     group = new THREE.Group();
     scene.add(group);
 }
-
 function addFloor() {
     const geometry = new THREE.BoxGeometry(10, 0.5, 10);
     const material = new THREE.MeshBasicMaterial({
