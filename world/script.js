@@ -8,7 +8,12 @@ import threejsExt from "https://cdn.skypack.dev/threejs-ext";
 import ImprovedNoise from "https://cdn.jsdelivr.net/npm/improved-noise@0.0.3/+esm";
 import * as dat from "https://cdn.skypack.dev/dat.gui@0.7.9";
 
+import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/+esm";
+import CannonEsDebugger from "https://cdn.jsdelivr.net/npm/cannon-es-debugger@1.0.0/+esm";
+
 // import { Sky } from "https://cdn.skypack.dev/three@0.130.1/examples/jsm/objects/Sky.js";
+
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 console.clear();
 
@@ -18,7 +23,6 @@ class Studio {
         this.camera = this._setCamera();
         this.renderer = this._setRenderer();
         if (conf.helper) this._setHelper();
-        window.addEventListener("resize", this._onWindowResize, false);
     }
     _setScene() {
         this._scene = new THREE.Scene();
@@ -53,11 +57,6 @@ class Studio {
 
         this._axesHelper = new THREE.AxesHelper(10);
         this._scene.add(this._axesHelper);
-    }
-    _onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
     }
 }
 class Light {
@@ -296,7 +295,7 @@ class Gui {
 // - - - - -
 window.onload = () => {
     // - - - - -
-
+    // Studio
     const studio = new Studio({ helper: true });
     const scene = studio.scene;
     const camera = studio.camera;
@@ -304,6 +303,16 @@ window.onload = () => {
 
     // Stage (renderer)
     document.body.appendChild(renderer.domElement);
+
+    // Physics
+    const world = new CANNON.World({
+        gravity: new CANNON.Vec3(0, -9.82, 0), // m/s²
+    });
+    const cannonDebugger = new CannonEsDebugger(scene, world, {
+        color: 0x99ff99,
+        alpha: 0.5,
+    });
+    const cannonDebug = false;
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -377,6 +386,27 @@ window.onload = () => {
     groundMesh.receiveShadow = true;
     scene.add(groundMesh);
 
+    // Objects and physics
+    const radius = 1;
+    const sphereGeometry = new THREE.SphereGeometry(radius);
+    const sphereMaterial = new THREE.MeshNormalMaterial();
+    const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    scene.add(sphereMesh);
+
+    const sphereBody = new CANNON.Body({
+        mass: 5, // kg
+        shape: new CANNON.Sphere(radius),
+    });
+    sphereBody.position.set(0, 200, 0); // m
+    world.addBody(sphereBody);
+
+    const groundBody = new CANNON.Body({
+        type: CANNON.Body.STATIC,
+        shape: new CANNON.Plane(),
+    });
+    groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); // make it face up
+    world.addBody(groundBody);
+
     // Gui
     const ambientControls = {
         target: ambient,
@@ -397,9 +427,22 @@ window.onload = () => {
 
     function animate() {
         requestAnimationFrame(animate);
+
+        sphereMesh.position.copy(sphereBody.position);
+        sphereMesh.quaternion.copy(sphereBody.quaternion);
+
+        world.fixedStep();
+        cannonDebugger.update();
+
         stage.play(actors);
     }
     animate();
+
+    window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
     // - - - - -
 };
 // - - - - -
