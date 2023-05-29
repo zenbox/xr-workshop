@@ -30,11 +30,15 @@ import Gui from "./class/Gui.js";
 let isModels = false;
 let isTerrain = false;
 let isWater = false;
+let isCube = false;
+let isGround = false;
+let isPhysics = false;
+let isSky = false;
 // - - - - -
 window.onload = () => {
     // - - - - -
     // Studio
-    const studio = new Studio({ helper: true });
+    const studio = new Studio({ helper: false });
     const scene = studio.scene;
     const camera = studio.camera;
     const renderer = studio.renderer;
@@ -128,35 +132,52 @@ window.onload = () => {
         wireframe: true,
     });
     const standard = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-    const ground = new THREE.MeshStandardMaterial({ color: 0xcceeaa });
+    const ground = new THREE.MeshStandardMaterial({ color: 0x00bb44 });
     const phong = new THREE.MeshPhongMaterial({ color: 0xff0000 });
 
+    // - - - - -
+    const geometry = new THREE.BoxGeometry(5, 5, 5);
+
+    const wire = new THREE.WireframeGeometry(geometry);
+
+    const line = new THREE.LineSegments(wire);
+    line.material.depthTest = false;
+    line.material.opacity = 1;
+    line.material.transparent = false;
+
+    scene.add(line);
     // - - - - -
     const cubeGeometry = new THREE.BoxGeometry(1, 2, 1);
     const cubeMesh = new THREE.Mesh(cubeGeometry, standard);
     cubeMesh.position.set(3, 2, 0);
     cubeMesh.castShadow = true;
     cubeMesh.receiveShadow = true;
-    scene.add(cubeMesh);
+    if (isCube) {
+        scene.add(cubeMesh);
+    }
     daylight.target = cubeMesh;
 
-    const groundGeometrie = new THREE.BoxGeometry(
-        groundLength,
-        0.01,
-        groundLength
-    );
-    const groundMesh = new THREE.Mesh(groundGeometrie, ground);
-    groundMesh.position.set(0, -0.05, 0);
-    groundMesh.castShadow = false;
-    groundMesh.receiveShadow = true;
-    scene.add(groundMesh);
+    if (isGround) {
+        const groundGeometrie = new THREE.BoxGeometry(
+            groundLength,
+            0.01,
+            groundLength
+        );
+        const groundMesh = new THREE.Mesh(groundGeometrie, ground);
+        groundMesh.position.set(0, -0.05, 0);
+        groundMesh.castShadow = false;
+        groundMesh.receiveShadow = true;
+        scene.add(groundMesh);
+    }
 
     // Objects and physics
     const radius = 1;
     const sphereGeometry = new THREE.SphereGeometry(radius);
     const sphereMaterial = new THREE.MeshNormalMaterial();
     const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    scene.add(sphereMesh);
+    if (isPhysics) {
+        scene.add(sphereMesh);
+    }
 
     const sphereBody = new CANNON.Body({
         mass: 5, // kg
@@ -169,9 +190,11 @@ window.onload = () => {
         type: CANNON.Body.STATIC,
         shape: new CANNON.Plane(),
     });
-    groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); // make it face up
-    world.addBody(groundBody);
 
+    groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); // make it face up
+    if (isPhysics) {
+        world.addBody(groundBody);
+    }
     if (isModels) {
         // Models (gltb)
         let mixerTokyo, mixerFlamingo;
@@ -221,11 +244,11 @@ window.onload = () => {
     }
 
     // Sun
-    // Add Sky
     const sky = new Sky();
     sky.scale.setScalar(450000);
-    scene.add(sky);
-
+    if (isSky) {
+        scene.add(sky);
+    }
     const sun = new THREE.Vector3();
     // Gui
     const ambientControls = {
@@ -243,7 +266,7 @@ window.onload = () => {
         rayleigh: 3,
         mieCoefficient: 0.005,
         mieDirectionalG: 0.7,
-        elevation: 2,
+        elevation: 45,
         azimuth: 180,
         exposure: renderer.toneMappingExposure,
     };
