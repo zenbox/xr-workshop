@@ -14,6 +14,7 @@ import CannonEsDebugger from "https://cdn.jsdelivr.net/npm/cannon-es-debugger@1.
 // import { Sky } from "https://cdn.skypack.dev/three@0.130.1/examples/jsm/objects/Sky.js";
 
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader";
 
 console.clear();
 
@@ -330,7 +331,7 @@ window.onload = () => {
 
     // Fog
     const fog = new Fog();
-    scene.fog = fog;
+    // scene.fog = fog;
 
     // Camera
     camera.position.x = 0;
@@ -345,6 +346,7 @@ window.onload = () => {
 
     // Terrain
     let terrain = new Terrain();
+    terrain.position.set(-400, -85, 0);
     scene.add(terrain);
 
     // Water
@@ -406,6 +408,31 @@ window.onload = () => {
     });
     groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); // make it face up
     world.addBody(groundBody);
+
+    // Models (gltb)
+    const loader = new GLTFLoader();
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("jsm/libs/draco/gltf/");
+
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(
+        // "models/LittlestTokyo.glb",
+        "models/flamingo.glb",
+        (gltf) => {
+            // called when the resource is loaded
+            gltf.scene.scale.set(0.025, 0.025, 0.025);
+            gltf.scene.position.set(-2, 2.5, 0);
+            scene.add(gltf.scene);
+        },
+        (xhr) => {
+            // called while loading is progressing
+            console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
+        },
+        (error) => {
+            // called when loading has errors
+            console.error("An error happened", error);
+        }
+    );
 
     // Gui
     const ambientControls = {
