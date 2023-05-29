@@ -1,30 +1,30 @@
 import * as THREE from "three";
 
-import { GUI } from "three/addons/libs/lil-gui.module.min.js";
+// import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Water } from "three/addons/objects/Water2.js";
 
-import threejsExt from "https://cdn.skypack.dev/threejs-ext";
-import ImprovedNoise from "https://cdn.jsdelivr.net/npm/improved-noise@0.0.3/+esm";
-import * as dat from "https://cdn.skypack.dev/dat.gui@0.7.9";
+// import threejsExt from "https://cdn.skypack.dev/threejs-ext";
+// import ImprovedNoise from "https://cdn.jsdelivr.net/npm/improved-noise@0.0.3/+esm";
+// import * as dat from "https://cdn.skypack.dev/dat.gui@0.7.9";
 
 import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/+esm";
 import CannonEsDebugger from "https://cdn.jsdelivr.net/npm/cannon-es-debugger@1.0.0/+esm";
 
-// import { Sky } from "https://cdn.skypack.dev/three@0.130.1/examples/jsm/objects/Sky.js";
+// import { Sky } from "three/addons/objects/Sky.js";
 
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader";
 
 console.clear();
 
-import Studio from "./class/Studio.js"
-import Light from "./class/Light.js"
-import Plot from "./class/Plot.js"
-import Sun from "./class/Sun.js"
-import Terrain from "./class/Terrain.js"
-import Fog from "./class/Fog.js"
-import Gui from "./class/Gui.js"
+import Studio from "./class/Studio.js";
+import Light from "./class/Light.js";
+import Plot from "./class/Plot.js";
+import Sun from "./class/Sun.js";
+import Terrain from "./class/Terrain.js";
+import Fog from "./class/Fog.js";
+import Gui from "./class/Gui.js";
 
 // - - - - -
 window.onload = () => {
@@ -34,7 +34,15 @@ window.onload = () => {
     const scene = studio.scene;
     const camera = studio.camera;
     const renderer = studio.renderer;
+    const clock = new THREE.Clock();
+    const loader = new GLTFLoader();
+    const dracoLoader = new DRACOLoader();
 
+    dracoLoader.setDecoderPath(
+        "../node_modules/three/examples/jsm/libs/draco/gltf/"
+    );
+
+    loader.setDRACOLoader(dracoLoader);
     // Stage (renderer)
     document.body.appendChild(renderer.domElement);
 
@@ -64,7 +72,7 @@ window.onload = () => {
 
     // Fog
     const fog = new Fog();
-    // scene.fog = fog;
+    scene.fog = fog;
 
     // Camera
     camera.position.x = 0;
@@ -73,21 +81,29 @@ window.onload = () => {
     camera.lookAt(scene.position);
 
     // Sun
-    // const sun = new Sun();
+    const sun = new Sun();
+    const sky = sun.addSky();
+    scene.add(sky);
     // scene.add(sun);
-    // scene.add(sun.addSky());
 
     // Terrain
     let terrain = new Terrain();
     terrain.position.set(-400, -85, 0);
     scene.add(terrain);
 
+    let groundLength = 1000;
+
     // Water
     const textureLoader = new THREE.TextureLoader();
-    const waterGeometry = new THREE.PlaneGeometry(12, 12, 50, 50);
+    const waterGeometry = new THREE.PlaneGeometry(
+        groundLength,
+        groundLength,
+        50,
+        50
+    );
     const flowMap = textureLoader.load("textures/water/Water_1_M_Flow.jpg");
     const waterMesh = new Water(waterGeometry, {
-        scale: 2,
+        scale: 32,
         textureWidth: 1024,
         textureHeight: 1024,
         flowMap: flowMap,
@@ -108,13 +124,17 @@ window.onload = () => {
     // - - - - -
     const cubeGeometry = new THREE.BoxGeometry(1, 2, 1);
     const cubeMesh = new THREE.Mesh(cubeGeometry, standard);
-    cubeMesh.position.set(0, 2, 0);
+    cubeMesh.position.set(3, 2, 0);
     cubeMesh.castShadow = true;
     cubeMesh.receiveShadow = true;
     scene.add(cubeMesh);
     daylight.target = cubeMesh;
 
-    const groundGeometrie = new THREE.BoxGeometry(10, 0.01, 10);
+    const groundGeometrie = new THREE.BoxGeometry(
+        groundLength,
+        0.01,
+        groundLength
+    );
     const groundMesh = new THREE.Mesh(groundGeometrie, ground);
     groundMesh.position.set(0, -0.05, 0);
     groundMesh.castShadow = false;
@@ -143,19 +163,18 @@ window.onload = () => {
     world.addBody(groundBody);
 
     // Models (gltb)
-    const loader = new GLTFLoader();
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath("jsm/libs/draco/gltf/");
+    let mixerTokyo, mixerFlamingo;
 
-    loader.setDRACOLoader(dracoLoader);
     loader.load(
-        // "models/LittlestTokyo.glb",
         "models/flamingo.glb",
         (gltf) => {
             // called when the resource is loaded
-            gltf.scene.scale.set(0.025, 0.025, 0.025);
-            gltf.scene.position.set(-2, 2.5, 0);
-            scene.add(gltf.scene);
+            const model = gltf.scene;
+            model.scale.set(0.025, 0.025, 0.025);
+            model.position.set(-2, 2.5, 0);
+            scene.add(model);
+            mixerFlamingo = new THREE.AnimationMixer(model);
+            mixerFlamingo.clipAction(gltf.animations[0]).play();
         },
         (xhr) => {
             // called while loading is progressing
@@ -167,6 +186,27 @@ window.onload = () => {
         }
     );
 
+    loader.load(
+        "models/LittlestTokyo.glb",
+        (gltf) => {
+            // called when the resource is loaded
+            const model = gltf.scene;
+            model.scale.set(0.025, 0.025, 0.025);
+            model.position.set(10, 5, -50);
+            scene.add(model);
+
+            mixerTokyo = new THREE.AnimationMixer(model);
+            mixerTokyo.clipAction(gltf.animations[0]).play();
+        },
+        (xhr) => {
+            // called while loading is progressing
+            console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
+        },
+        (error) => {
+            // called when loading has errors
+            console.error("An error happened", error);
+        }
+    );
     // Gui
     const ambientControls = {
         target: ambient,
@@ -193,6 +233,10 @@ window.onload = () => {
 
         world.fixedStep();
         cannonDebugger.update();
+
+        const delta = clock.getDelta();
+        if (mixerTokyo) mixerTokyo.update(delta);
+        if (mixerFlamingo) mixerFlamingo.update(delta);
 
         stage.play(actors);
     }

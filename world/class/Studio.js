@@ -45,8 +45,9 @@ export default class Studio {
         this._renderer.setSize(window.innerWidth, window.innerHeight);
         this._renderer.shadowMap.enabled = true;
         this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-        this._renderer.setClearColor({ color: 0x334499, alpha: 0.5 });
+        this._renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this._renderer.toneMappingExposure = 0.5;
+        this._renderer.setClearColor({ color: 0x334499, alpha: 0.95 });
 
         return this._renderer;
     }
@@ -57,4 +58,4 @@ export default class Studio {
         this._axesHelper = new THREE.AxesHelper(10);
         this._scene.add(this._axesHelper);
     }
-  }
+}
