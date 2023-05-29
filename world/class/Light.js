@@ -27,6 +27,10 @@ export default class Light {
                 break;
             case "directional":
                 this._light = this._addDirectional();
+                break;
+            case "hemisphere":
+                this._light = this._addHemisphere();
+                break;
         }
         return this._light;
     }
@@ -51,4 +55,15 @@ export default class Light {
         this._light = new THREE.DirectionalLight(0xffffff, 0.5);
         return this._light;
     }
-  }
+    _addHemisphere() {
+        const skyColor = "skyblue"; // helles Himmelblau
+        const groundColor = "forestgreen"; // Grün
+        const intensity = 1;
+        this._light = new THREE.HemisphereLight(
+            skyColor,
+            groundColor,
+            intensity
+        );
+        return this._light;
+    }
+}

@@ -1,8 +1,7 @@
 import * as THREE from "three";
 
-// import { GUI } from "three/addons/libs/lil-gui.module.min.js";
+import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { Water } from "three/addons/objects/Water2.js";
 
 // import threejsExt from "https://cdn.skypack.dev/threejs-ext";
 // import ImprovedNoise from "https://cdn.jsdelivr.net/npm/improved-noise@0.0.3/+esm";
@@ -11,7 +10,8 @@ import { Water } from "three/addons/objects/Water2.js";
 import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/+esm";
 import CannonEsDebugger from "https://cdn.jsdelivr.net/npm/cannon-es-debugger@1.0.0/+esm";
 
-// import { Sky } from "three/addons/objects/Sky.js";
+import { Water } from "three/examples/jsm/objects/Water2.js";
+import { Sky } from "three/examples/jsm/objects/Sky.js";
 
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader";
@@ -21,11 +21,15 @@ console.clear();
 import Studio from "./class/Studio.js";
 import Light from "./class/Light.js";
 import Plot from "./class/Plot.js";
-import Sun from "./class/Sun.js";
+// import Sun from "./class/Sun.js";
 import Terrain from "./class/Terrain.js";
 import Fog from "./class/Fog.js";
 import Gui from "./class/Gui.js";
 
+// - - - - -
+let isModels = false;
+let isTerrain = false;
+let isWater = false;
 // - - - - -
 window.onload = () => {
     // - - - - -
@@ -66,13 +70,15 @@ window.onload = () => {
     const ambient = new Light("ambient");
     const spot = new Light("spot");
     const daylight = new Light("directional");
+    const skylight = new Light("hemisphere");
     scene.add(ambient);
     scene.add(spot);
     scene.add(daylight);
+    scene.add(skylight);
 
     // Fog
     const fog = new Fog();
-    scene.fog = fog;
+    // scene.fog = fog;
 
     // Camera
     camera.position.x = 0;
@@ -81,36 +87,40 @@ window.onload = () => {
     camera.lookAt(scene.position);
 
     // Sun
-    const sun = new Sun();
-    const sky = sun.addSky();
-    scene.add(sky);
+    // const sun = new Sun();
+    // const sky = sun.addSky();
+    // scene.add(sky);
     // scene.add(sun);
-
-    // Terrain
-    let terrain = new Terrain();
-    terrain.position.set(-400, -85, 0);
-    scene.add(terrain);
 
     let groundLength = 1000;
 
-    // Water
-    const textureLoader = new THREE.TextureLoader();
-    const waterGeometry = new THREE.PlaneGeometry(
-        groundLength,
-        groundLength,
-        50,
-        50
-    );
-    const flowMap = textureLoader.load("textures/water/Water_1_M_Flow.jpg");
-    const waterMesh = new Water(waterGeometry, {
-        scale: 32,
-        textureWidth: 1024,
-        textureHeight: 1024,
-        flowMap: flowMap,
-    });
-    waterMesh.rotation.set(-Math.PI / 2, 0, 0);
-    waterMesh.position.y = 0.5;
-    scene.add(waterMesh);
+    if (isTerrain) {
+        // Terrain
+        let terrain = new Terrain();
+        terrain.position.set(-400, -85, 0);
+        scene.add(terrain);
+    }
+
+    if (isWater) {
+        // Water
+        const textureLoader = new THREE.TextureLoader();
+        const waterGeometry = new THREE.PlaneGeometry(
+            groundLength,
+            groundLength,
+            50,
+            50
+        );
+        const flowMap = textureLoader.load("textures/water/Water_1_M_Flow.jpg");
+        const waterMesh = new Water(waterGeometry, {
+            scale: 32,
+            textureWidth: 1024,
+            textureHeight: 1024,
+            flowMap: flowMap,
+        });
+        waterMesh.rotation.set(-Math.PI / 2, 0, 0);
+        waterMesh.position.y = 0.25;
+        scene.add(waterMesh);
+    }
 
     // Materials and Objects
     const wireframe = new THREE.MeshBasicMaterial({
@@ -118,7 +128,7 @@ window.onload = () => {
         wireframe: true,
     });
     const standard = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-    const ground = new THREE.MeshStandardMaterial({ color: 0xc5d48f });
+    const ground = new THREE.MeshStandardMaterial({ color: 0xcceeaa });
     const phong = new THREE.MeshPhongMaterial({ color: 0xff0000 });
 
     // - - - - -
@@ -162,59 +172,113 @@ window.onload = () => {
     groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); // make it face up
     world.addBody(groundBody);
 
-    // Models (gltb)
-    let mixerTokyo, mixerFlamingo;
+    if (isModels) {
+        // Models (gltb)
+        let mixerTokyo, mixerFlamingo;
 
-    loader.load(
-        "models/flamingo.glb",
-        (gltf) => {
-            // called when the resource is loaded
-            const model = gltf.scene;
-            model.scale.set(0.025, 0.025, 0.025);
-            model.position.set(-2, 2.5, 0);
-            scene.add(model);
-            mixerFlamingo = new THREE.AnimationMixer(model);
-            mixerFlamingo.clipAction(gltf.animations[0]).play();
-        },
-        (xhr) => {
-            // called while loading is progressing
-            console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
-        },
-        (error) => {
-            // called when loading has errors
-            console.error("An error happened", error);
-        }
-    );
+        loader.load(
+            "models/flamingo.glb",
+            (gltf) => {
+                // called when the resource is loaded
+                const model = gltf.scene;
+                model.scale.set(0.025, 0.025, 0.025);
+                model.position.set(-2, 2.5, 0);
+                scene.add(model);
+                mixerFlamingo = new THREE.AnimationMixer(model);
+                mixerFlamingo.clipAction(gltf.animations[0]).play();
+            },
+            (xhr) => {
+                // called while loading is progressing
+                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
+            },
+            (error) => {
+                // called when loading has errors
+                console.error("An error happened", error);
+            }
+        );
 
-    loader.load(
-        "models/LittlestTokyo.glb",
-        (gltf) => {
-            // called when the resource is loaded
-            const model = gltf.scene;
-            model.scale.set(0.025, 0.025, 0.025);
-            model.position.set(10, 5, -50);
-            scene.add(model);
+        loader.load(
+            "models/LittlestTokyo.glb",
+            (gltf) => {
+                // called when the resource is loaded
+                const model = gltf.scene;
+                model.scale.set(0.025, 0.025, 0.025);
+                model.position.set(10, 5, -50);
+                scene.add(model);
 
-            mixerTokyo = new THREE.AnimationMixer(model);
-            mixerTokyo.clipAction(gltf.animations[0]).play();
-        },
-        (xhr) => {
-            // called while loading is progressing
-            console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
-        },
-        (error) => {
-            // called when loading has errors
-            console.error("An error happened", error);
-        }
-    );
+                mixerTokyo = new THREE.AnimationMixer(model);
+                mixerTokyo.clipAction(gltf.animations[0]).play();
+            },
+            (xhr) => {
+                // called while loading is progressing
+                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
+            },
+            (error) => {
+                // called when loading has errors
+                console.error("An error happened", error);
+            }
+        );
+    }
+
+    // Sun
+    // Add Sky
+    const sky = new Sky();
+    sky.scale.setScalar(450000);
+    scene.add(sky);
+
+    const sun = new THREE.Vector3();
     // Gui
     const ambientControls = {
         target: ambient,
         key: "intensity",
         intensity: ambient.intensity,
     };
-    const gui = new Gui();
-    gui.add(ambientControls);
+    // const gui = new Gui();
+    // gui.add(ambientControls);
+
+    const gui = new GUI();
+
+    const effectController = {
+        turbidity: 10,
+        rayleigh: 3,
+        mieCoefficient: 0.005,
+        mieDirectionalG: 0.7,
+        elevation: 2,
+        azimuth: 180,
+        exposure: renderer.toneMappingExposure,
+    };
+
+    function guiChanged() {
+        const uniforms = sky.material.uniforms;
+        uniforms["turbidity"].value = effectController.turbidity;
+        uniforms["rayleigh"].value = effectController.rayleigh;
+        uniforms["mieCoefficient"].value = effectController.mieCoefficient;
+        uniforms["mieDirectionalG"].value = effectController.mieDirectionalG;
+
+        const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
+        const theta = THREE.MathUtils.degToRad(effectController.azimuth);
+
+        sun.setFromSphericalCoords(1, phi, theta);
+
+        uniforms["sunPosition"].value.copy(sun);
+
+        renderer.toneMappingExposure = effectController.exposure;
+        renderer.render(scene, camera);
+    }
+
+    gui.add(effectController, "turbidity", 0.0, 20.0, 0.1).onChange(guiChanged);
+    gui.add(effectController, "rayleigh", 0.0, 4, 0.001).onChange(guiChanged);
+    gui.add(effectController, "mieCoefficient", 0.0, 0.1, 0.001).onChange(
+        guiChanged
+    );
+    gui.add(effectController, "mieDirectionalG", 0.0, 1, 0.001).onChange(
+        guiChanged
+    );
+    gui.add(effectController, "elevation", 0, 90, 0.1).onChange(guiChanged);
+    gui.add(effectController, "azimuth", -180, 180, 0.1).onChange(guiChanged);
+    gui.add(effectController, "exposure", 0, 1, 0.0001).onChange(guiChanged);
+
+    guiChanged();
 
     // Action
     const stage = new Plot();
@@ -232,12 +296,13 @@ window.onload = () => {
         sphereMesh.quaternion.copy(sphereBody.quaternion);
 
         world.fixedStep();
-        cannonDebugger.update();
+        // cannonDebugger.update();
 
         const delta = clock.getDelta();
-        if (mixerTokyo) mixerTokyo.update(delta);
-        if (mixerFlamingo) mixerFlamingo.update(delta);
-
+        if (isModels) {
+            if (mixerTokyo) mixerTokyo.update(delta);
+            if (mixerFlamingo) mixerFlamingo.update(delta);
+        }
         stage.play(actors);
     }
     animate();

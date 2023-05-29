@@ -25,9 +25,12 @@ export default class Sun {
     }
 
     moveSun(time) {
-        var distance = 4000;
-        var theta = Math.PI * (inclination - 0.5);
-        var phi = 2 * Math.PI * (azimuth - 0.5);
+        let distance = 40000;
+        let inclination = 90;
+        let azimuth = 180;
+        let theta = Math.PI * (inclination - 0.5);
+        let phi = 2 * Math.PI * (azimuth - 0.5);
+        let exposure = 0.3
 
         this.sunSphere.position.x = distance * Math.cos(phi);
         this.sunSphere.position.y = distance * Math.sin(phi) * Math.sin(theta);
@@ -39,6 +42,7 @@ export default class Sun {
         this.sky = new Sky();
         this.sky.scale.setScalar(450000);
         this.uniforms = this.sky.material.uniforms;
+
         this.uniforms.turbidity.value = 16;
         this.uniforms.rayleigh.value = 1.027;
         this.uniforms.mieCoefficient.value = 0.01;
