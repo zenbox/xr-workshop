@@ -13,9 +13,6 @@ import CannonEsDebugger from "https://cdn.jsdelivr.net/npm/cannon-es-debugger@1.
 
 // import { Sky } from "https://cdn.skypack.dev/three@0.130.1/examples/jsm/objects/Sky.js";
 
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { DRACOLoader } from "three/addons/loaders/DRACOLoader";
-
 export default class Studio {
     constructor(conf) {
         this.scene = this._setScene();

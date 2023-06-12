@@ -13,9 +13,6 @@ import CannonEsDebugger from "https://cdn.jsdelivr.net/npm/cannon-es-debugger@1.
 import { Water } from "three/examples/jsm/objects/Water2.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { DRACOLoader } from "three/addons/loaders/DRACOLoader";
-
 console.clear();
 
 import Studio from "./class/Studio.js";
@@ -26,14 +23,9 @@ import Terrain from "./class/Terrain.js";
 import Fog from "./class/Fog.js";
 import Gui from "./class/Gui.js";
 
-// - - - - -
-let isModels = false;
-let isTerrain = false;
-let isWater = false;
-let isCube = false;
-let isGround = false;
-let isPhysics = false;
-let isSky = false;
+import Model from "./class/Model.js";
+import House from "./class/House.js";
+
 // - - - - -
 window.onload = () => {
     // - - - - -
@@ -43,14 +35,7 @@ window.onload = () => {
     const camera = studio.camera;
     const renderer = studio.renderer;
     const clock = new THREE.Clock();
-    const loader = new GLTFLoader();
-    const dracoLoader = new DRACOLoader();
 
-    dracoLoader.setDecoderPath(
-        "../node_modules/three/examples/jsm/libs/draco/gltf/"
-    );
-
-    loader.setDRACOLoader(dracoLoader);
     // Stage (renderer)
     document.body.appendChild(renderer.domElement);
 
@@ -86,7 +71,7 @@ window.onload = () => {
 
     // Camera
     camera.position.x = 0;
-    camera.position.z = 8;
+    camera.position.z = 25;
     camera.position.y = 2;
     camera.lookAt(scene.position);
 
@@ -98,33 +83,34 @@ window.onload = () => {
 
     let groundLength = 1000;
 
-    if (isTerrain) {
-        // Terrain
-        let terrain = new Terrain();
-        terrain.position.set(-400, -85, 0);
-        scene.add(terrain);
-    }
+    // Terrain
+    let terrain = new Terrain();
+    terrain.position.set(-400, -85, 0);
+    scene.add(terrain);
 
-    if (isWater) {
-        // Water
-        const textureLoader = new THREE.TextureLoader();
-        const waterGeometry = new THREE.PlaneGeometry(
-            groundLength,
-            groundLength,
-            50,
-            50
-        );
-        const flowMap = textureLoader.load("textures/water/Water_1_M_Flow.jpg");
-        const waterMesh = new Water(waterGeometry, {
-            scale: 32,
-            textureWidth: 1024,
-            textureHeight: 1024,
-            flowMap: flowMap,
-        });
-        waterMesh.rotation.set(-Math.PI / 2, 0, 0);
-        waterMesh.position.y = 0.25;
-        scene.add(waterMesh);
-    }
+    // Water
+    const textureLoader = new THREE.TextureLoader();
+    const waterGeometry = new THREE.PlaneGeometry(
+        groundLength,
+        groundLength,
+        50,
+        50
+    );
+    const flowMap = textureLoader.load("textures/water/Water_1_M_Flow.jpg");
+    const waterMesh = new Water(waterGeometry, {
+        scale: 32,
+        textureWidth: 1024,
+        textureHeight: 1024,
+        flowMap: flowMap,
+    });
+    waterMesh.rotation.set(-Math.PI / 2, 0, 0);
+    waterMesh.position.y = 0.25;
+    scene.add(waterMesh);
+
+    // - - - - -
+    const house = new House(scene);
+    scene.add(house);
+    // - - - - -
 
     // Materials and Objects
     const wireframe = new THREE.MeshBasicMaterial({
@@ -145,39 +131,36 @@ window.onload = () => {
     line.material.opacity = 1;
     line.material.transparent = false;
 
-    scene.add(line);
+    // scene.add(line);
     // - - - - -
     const cubeGeometry = new THREE.BoxGeometry(1, 2, 1);
     const cubeMesh = new THREE.Mesh(cubeGeometry, standard);
     cubeMesh.position.set(3, 2, 0);
     cubeMesh.castShadow = true;
     cubeMesh.receiveShadow = true;
-    if (isCube) {
-        scene.add(cubeMesh);
-    }
+
+    scene.add(cubeMesh);
+
     daylight.target = cubeMesh;
 
-    if (isGround) {
-        const groundGeometrie = new THREE.BoxGeometry(
-            groundLength,
-            0.01,
-            groundLength
-        );
-        const groundMesh = new THREE.Mesh(groundGeometrie, ground);
-        groundMesh.position.set(0, -0.05, 0);
-        groundMesh.castShadow = false;
-        groundMesh.receiveShadow = true;
-        scene.add(groundMesh);
-    }
+    const groundGeometrie = new THREE.BoxGeometry(
+        groundLength,
+        0.01,
+        groundLength
+    );
+    const groundMesh = new THREE.Mesh(groundGeometrie, ground);
+    groundMesh.position.set(0, -0.05, 0);
+    groundMesh.castShadow = false;
+    groundMesh.receiveShadow = true;
+    scene.add(groundMesh);
 
     // Objects and physics
     const radius = 1;
     const sphereGeometry = new THREE.SphereGeometry(radius);
     const sphereMaterial = new THREE.MeshNormalMaterial();
     const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    if (isPhysics) {
-        scene.add(sphereMesh);
-    }
+
+    scene.add(sphereMesh);
 
     const sphereBody = new CANNON.Body({
         mass: 5, // kg
@@ -192,64 +175,23 @@ window.onload = () => {
     });
 
     groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0); // make it face up
-    if (isPhysics) {
-        world.addBody(groundBody);
-    }
-    if (isModels) {
-        // Models (gltb)
-        let mixerTokyo, mixerFlamingo;
 
-        loader.load(
-            "models/flamingo.glb",
-            (gltf) => {
-                // called when the resource is loaded
-                const model = gltf.scene;
-                model.scale.set(0.025, 0.025, 0.025);
-                model.position.set(-2, 2.5, 0);
-                scene.add(model);
-                mixerFlamingo = new THREE.AnimationMixer(model);
-                mixerFlamingo.clipAction(gltf.animations[0]).play();
-            },
-            (xhr) => {
-                // called while loading is progressing
-                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
-            },
-            (error) => {
-                // called when loading has errors
-                console.error("An error happened", error);
-            }
-        );
+    world.addBody(groundBody);
 
-        loader.load(
-            "models/LittlestTokyo.glb",
-            (gltf) => {
-                // called when the resource is loaded
-                const model = gltf.scene;
-                model.scale.set(0.025, 0.025, 0.025);
-                model.position.set(10, 5, -50);
-                scene.add(model);
+    // Models (gltb)
 
-                mixerTokyo = new THREE.AnimationMixer(model);
-                mixerTokyo.clipAction(gltf.animations[0]).play();
-            },
-            (xhr) => {
-                // called while loading is progressing
-                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
-            },
-            (error) => {
-                // called when loading has errors
-                console.error("An error happened", error);
-            }
-        );
-    }
+    let tokyo = new Model("models/LittlestTokyo.glb", scene, {scale: 0.05});
+    let flamingo = new Model("models/flamingo.glb", scene, {scale:0.25});
+
+    console.dir(tokyo);
+    console.dir(flamingo);
 
     // Sun
     const sky = new Sky();
     sky.scale.setScalar(450000);
-    if (isSky) {
-        scene.add(sky);
-    }
+    scene.add(sky);
     const sun = new THREE.Vector3();
+
     // Gui
     const ambientControls = {
         target: ambient,
@@ -258,7 +200,6 @@ window.onload = () => {
     };
     // const gui = new Gui();
     // gui.add(ambientControls);
-
     const gui = new GUI();
 
     const effectController = {
@@ -322,10 +263,10 @@ window.onload = () => {
         // cannonDebugger.update();
 
         const delta = clock.getDelta();
-        if (isModels) {
-            if (mixerTokyo) mixerTokyo.update(delta);
-            if (mixerFlamingo) mixerFlamingo.update(delta);
-        }
+
+        if (typeof tokyo.update === "function") tokyo.update(delta);
+        if (typeof flamingo.update === "function") flamingo.update(delta);
+
         stage.play(actors);
     }
     animate();
