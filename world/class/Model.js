@@ -3,11 +3,12 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader";
 
 export default class Model {
-    constructor(file, scene, options = {scale: 0.25}) {
+    constructor(file, scene, options = { scale: 0.25 }) {
         this.options = options;
         this.init();
         this.scene = scene;
         this.get(file);
+       
     }
     init() {
         this.loader = new GLTFLoader();
@@ -23,16 +24,16 @@ export default class Model {
             (gltf) => {
                 // called when the resource is loaded
                 let model = gltf.scene;
+                this.gltf = gltf;
                 model.scale.set(
                     this.options.scale,
                     this.options.scale,
                     this.options.scale
                 );
-                model.position.set(10, 5, -50);
+                model.position.set(10, 10.1, -5);
 
                 this.scene.add(model);
-
-                this.mixer = new THREE.AnimationMixer(model);
+ this.mixer = new THREE.AnimationMixer(model);
                 this.mixer.clipAction(gltf.animations[0]).play();
             },
             (xhr) => {

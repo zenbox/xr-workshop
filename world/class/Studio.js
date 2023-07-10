@@ -39,6 +39,7 @@ export default class Studio {
             alpha: true,
             logarithmicDepthBuffer: false,
         });
+        this._renderer.xr.enabled = true;
         this._renderer.setSize(window.innerWidth, window.innerHeight);
         this._renderer.shadowMap.enabled = true;
         this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;

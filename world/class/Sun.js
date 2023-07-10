@@ -1,16 +1,5 @@
 import * as THREE from "three";
-
-// import threejsExt from "https://cdn.skypack.dev/threejs-ext";
-// import ImprovedNoise from "https://cdn.jsdelivr.net/npm/improved-noise@0.0.3/+esm";
-// import * as dat from "https://cdn.skypack.dev/dat.gui@0.7.9";
-
-// import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/+esm";
-// import CannonEsDebugger from "https://cdn.jsdelivr.net/npm/cannon-es-debugger@1.0.0/+esm";
-
 import { Sky } from "three/examples/jsm/objects/Sky.js";
-
-// import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-// import { DRACOLoader } from "three/addons/loaders/DRACOLoader";
 
 export default class Sun {
     contructor() {
@@ -26,11 +15,11 @@ export default class Sun {
 
     moveSun(time) {
         let distance = 40000;
-        let inclination = 90;
-        let azimuth = 180;
+        let inclination = 10; // angle over horizon
+        let azimuth = 45; // position around
         let theta = Math.PI * (inclination - 0.5);
         let phi = 2 * Math.PI * (azimuth - 0.5);
-        let exposure = 0.3
+        let exposure = 0.3;
 
         this.sunSphere.position.x = distance * Math.cos(phi);
         this.sunSphere.position.y = distance * Math.sin(phi) * Math.sin(theta);
@@ -44,7 +33,7 @@ export default class Sun {
         this.uniforms = this.sky.material.uniforms;
 
         this.uniforms.turbidity.value = 16;
-        this.uniforms.rayleigh.value = 1.027;
+        this.uniforms.rayleigh.value = 0.6;
         this.uniforms.mieCoefficient.value = 0.01;
         this.uniforms.mieDirectionalG.value = 0.97;
 

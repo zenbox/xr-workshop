@@ -23,8 +23,10 @@ export default class Terrain {
         let terrainTexture = new THREE.CanvasTexture(
             this.generateTexture(data, worldWidth, worldDepth)
         );
+
         terrainTexture.wrapS = THREE.ClampToEdgeWrapping;
         terrainTexture.wrapT = THREE.ClampToEdgeWrapping;
+
         terrainTexture.colorSpace = THREE.SRGBColorSpace;
 
         let terrainMesh = new THREE.Mesh(
@@ -56,7 +58,7 @@ export default class Terrain {
                 );
             }
 
-            quality *= 5;
+            quality *= 3.1;
         }
 
         return data;
@@ -66,7 +68,7 @@ export default class Terrain {
 
         const vector3 = new THREE.Vector3(0, 0, 0);
 
-        const sun = new THREE.Vector3(1, 1, 1);
+        const sun = new THREE.Vector3(0.5, 0.5, 0.5);
         sun.normalize();
 
         const canvas = document.createElement("canvas");
@@ -86,10 +88,14 @@ export default class Terrain {
             vector3.normalize();
 
             shade = vector3.dot(sun);
+            let constant = 100;
+            imageData[i] =
+                constant / 10 + (96 + shade * 128) * (0.5 + data[j] * 0.007);
+            imageData[i + 1] =
+                constant + (32 + shade * 96) * (0.5 + data[j] * 0.007);
+            imageData[i + 2] = constant + shade * 96 * (0.5 + data[j] * 0.007);
 
-            imageData[i] = (96 + shade * 128) * (0.5 + data[j] * 0.007);
-            imageData[i + 1] = (32 + shade * 96) * (0.5 + data[j] * 0.007);
-            imageData[i + 2] = shade * 96 * (0.5 + data[j] * 0.007);
+            // console.log(imageData[i]);
         }
         context.putImageData(image, 0, 0);
 
