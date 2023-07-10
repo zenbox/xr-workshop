@@ -16,13 +16,29 @@ export default class Controller {
         // this.addRightGrip()
     }
 
+    /**
+     * @desc    setOrbitControl
+     * @returns {OrbitControl}
+     */
     setOrbitControl() {
-        this.orbitControl = new OrbitControls(this.camera, this.renderer.domElement)
-        this.orbitControl.enabled = true
-        this.orbitControl.maxDistance = 1500
-        this.orbitControl.minDistance = 0
+        try {
+            // - - -
+            this.orbitControl = new OrbitControls(
+                this.camera,
+                this.renderer.domElement
+            )
+            this.orbitControl.enabled = true
+            this.orbitControl.maxDistance = 1500
+            this.orbitControl.minDistance = 0
 
-        return this.orbitControl
+            return this.orbitControl
+
+            // - - -
+        } catch (error) {
+            console.log("setOrbitControl error.", error.message, error.name)
+
+            return undefined
+        }
     }
 
     buildController(data) {

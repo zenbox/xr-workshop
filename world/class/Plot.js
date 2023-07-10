@@ -5,8 +5,8 @@ export default class Plot {
         this.stuff = stuff
     }
     play(o) {
-        o.cube.rotation.x += 0.01
-        o.cube.rotation.y += 0.01
+        o.box.rotation.x += 0.01
+        o.box.rotation.y += 0.01
 
         o.renderer.render(o.scene, o.camera)
 
