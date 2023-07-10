@@ -178,7 +178,7 @@ window.onload = () => {
 
     // Models (gltb)
 
-    let tokyo = new Model("models/LittlestTokyo.glb", scene, { scale: 0.05 })
+    // let tokyo = new Model("models/LittlestTokyo.glb", scene, { scale: 0.05 })
     // let flamingo = new Model("models/flamingo.glb", scene, { scale: 0.25 });
 
     // Sun
@@ -193,7 +193,6 @@ window.onload = () => {
         key: "intensity",
         intensity: ambient.intensity,
     }
-    // const gui = new Gui();
     // gui.add(ambientControls);
     const gui = new GUI()
 
@@ -207,11 +206,9 @@ window.onload = () => {
         exposure: renderer.toneMappingExposure,
     }
 
-    gui.add(effectController, "turbidity", 0.0, 20.0, 0.1).onChange((event) =>
-        {
-            return guiChanged()
-        }
-    )
+    gui.add(effectController, "turbidity", 0.0, 20.0, 0.1).onChange((event) => {
+        return guiChanged()
+    })
     gui.add(effectController, "rayleigh", 0.0, 4, 0.001).onChange((event) =>
         guiChanged()
     )
@@ -231,7 +228,23 @@ window.onload = () => {
         guiChanged()
     )
 
-    guiChanged()
+    function guiChanged() {
+        const uniforms = sky.material.uniforms
+        uniforms["turbidity"].value = effectController.turbidity
+        uniforms["rayleigh"].value = effectController.rayleigh
+        uniforms["mieCoefficient"].value = effectController.mieCoefficient
+        uniforms["mieDirectionalG"].value = effectController.mieDirectionalG
+
+        const phi = THREE.MathUtils.degToRad(90 - effectController.elevation)
+        const theta = THREE.MathUtils.degToRad(effectController.azimuth)
+
+        sun.setFromSphericalCoords(1, phi, theta)
+
+        uniforms["sunPosition"].value.copy(sun)
+
+        renderer.toneMappingExposure = effectController.exposure
+        renderer.render(scene, camera)
+    }
 
     // Action
     const stage = new Plot()
@@ -264,11 +277,12 @@ window.onload = () => {
 
         const delta = clock.getDelta()
 
-        if (typeof tokyo.update === "function") tokyo.update(delta)
-        //   if (typeof flamingo.update === "function") flamingo.update(delta);
+        // if (tokyo && typeof tokyo.update === "function") tokyo.update(delta)
+        // if (typeof flamingo.update === "function") flamingo.update(delta);
 
         stage.play(actors)
     }
+    guiChanged()
     animate()
 
     window.addEventListener("resize", () => {

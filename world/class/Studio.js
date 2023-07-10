@@ -1,59 +1,130 @@
-import * as THREE from "three";
-
-import { GUI } from "three/addons/libs/lil-gui.module.min.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { Water } from "three/addons/objects/Water2.js";
-
-import threejsExt from "https://cdn.skypack.dev/threejs-ext";
-import ImprovedNoise from "https://cdn.jsdelivr.net/npm/improved-noise@0.0.3/+esm";
-import * as dat from "https://cdn.skypack.dev/dat.gui@0.7.9";
-
-import * as CANNON from "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/+esm";
-import CannonEsDebugger from "https://cdn.jsdelivr.net/npm/cannon-es-debugger@1.0.0/+esm";
-
-// import { Sky } from "https://cdn.skypack.dev/three@0.130.1/examples/jsm/objects/Sky.js";
+import * as THREE from "three"
 
 export default class Studio {
-    constructor(conf) {
-        this.scene = this._setScene();
-        this.camera = this._setCamera();
-        this.renderer = this._setRenderer();
-        if (conf.helper) this._setHelper();
+    constructor() {
+        this.setResizeBehaviour()
     }
-    _setScene() {
-        this._scene = new THREE.Scene();
-        return this._scene;
-    }
-    _setCamera() {
-        this._camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            20000
-        );
-        return this._camera;
-    }
-    _setRenderer() {
-        this._renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            alpha: true,
-            logarithmicDepthBuffer: false,
-        });
-        this._renderer.xr.enabled = true;
-        this._renderer.setSize(window.innerWidth, window.innerHeight);
-        this._renderer.shadowMap.enabled = true;
-        this._renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        this._renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this._renderer.toneMappingExposure = 0.5;
-        this._renderer.setClearColor({ color: 0x334499, alpha: 0.95 });
 
-        return this._renderer;
-    }
-    _setHelper() {
-        this._gridHelper = new THREE.GridHelper(10, 10);
-        this._scene.add(this._gridHelper);
+    /**
+     * @desc    setScene
+     * @returns {THREEJS Scene}
+     */
+    setScene() {
+        try {
+            // - - -
+            this.scene = new THREE.Scene()
+            return this.scene
+            // - - -
+        } catch (error) {
+            console.log("setScene error.", error.message, error.name)
 
-        this._axesHelper = new THREE.AxesHelper(10);
-        this._scene.add(this._axesHelper);
+            return undefined
+        }
+    }
+
+    /**
+     * @desc    setCamera
+     * @param   {object} args - parameters to determine the camera
+     * @returns {THREEJS Camera}
+     */
+    setCamera(args = undefined) {
+        try {
+            // - - -
+            this.camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                20000
+            )
+
+            this.camera.position.x = args?.x || 0
+            this.camera.position.y = args?.y || 2
+            this.camera.position.z = args?.z || 10
+
+            this.camera.lookAt(this.scene.position)
+
+            return this.camera
+            // - - -
+        } catch (error) {
+            console.log("setCamera error.", error.message, error.name)
+
+            return undefined
+        }
+    }
+
+    /**
+     * @desc    setRenderer
+     * @returns {THREEJS Renderer}
+     */
+    setRenderer(a = undefined) {
+        try {
+            // - - -
+            this.renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+                logarithmicDepthBuffer: false,
+            })
+            this.renderer.xr.enabled = true
+            this.renderer.setSize(window.innerWidth, window.innerHeight)
+            this.renderer.shadowMap.enabled = true
+            this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+            this.renderer.toneMapping = THREE.ACESFilmicToneMapping
+            this.renderer.toneMappingExposure = 0.5
+            this.renderer.setClearColor({ color: 0x334499, alpha: 0.95 })
+
+            return this.renderer
+            // - - -
+        } catch (error) {
+            console.log("setRenderer error.", error.message, error.name)
+
+            return undefined
+        }
+    }
+
+    /**
+     * @desc    setHelper
+     * @param   {obj} flags for scene helpers
+     * @returns {boolean}
+     */
+    setHelper(show = {}) {
+        try {
+            // - - -
+            if (show.grid) {
+                this.gridHelper = new THREE.GridHelper(10, 10)
+                this.scene.add(this.gridHelper)
+            }
+            if (show.axes) {
+                this.axesHelper = new THREE.AxesHelper(10)
+                this.scene.add(this.axesHelper)
+            }
+
+            return true
+            // - - -
+        } catch (error) {
+            console.log("setHelper error.", error.message, error.name)
+
+            return undefined
+        }
+    }
+
+    /**
+     * @desc    setResizeBehaviour
+     * @returns {boolean}
+     */
+    setResizeBehaviour() {
+        try {
+            // - - -
+            window.addEventListener("resize", () => {
+                this.camera.aspect = window.innerWidth / window.innerHeight
+                this.camera.updateProjectionMatrix()
+                this.renderer.setSize(window.innerWidth, window.innerHeight)
+            })
+            return true
+            // - - -
+        } catch (error) {
+            console.log("setResizeBehaviour error.", error.message, error.name)
+
+            return undefined
+        }
     }
 }

@@ -1,15 +1,28 @@
 import * as THREE from "three"
+
+import { OrbitControls } from "three/addons/controls/OrbitControls.js"
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js"
 
 export default class Controller {
-    constructor(scene, renderer) {
+    constructor(scene, camera, renderer) {
         this.scene = scene
+        this.camera = camera
         this.renderer = renderer
-        this.controllerModelFactory = new XRControllerModelFactory()
-        this.addLeftController()
-        this.addRightController()
-        this.addLeftGrip()
-        this.addRightGrip()
+
+        // this.controllerModelFactory = new XRControllerModelFactory()
+        // this.addLeftController()
+        // this.addRightController()
+        // this.addLeftGrip()
+        // this.addRightGrip()
+    }
+
+    setOrbitControl() {
+        this.orbitControl = new OrbitControls(this.camera, this.renderer.domElement)
+        this.orbitControl.enabled = true
+        this.orbitControl.maxDistance = 1500
+        this.orbitControl.minDistance = 0
+
+        return this.orbitControl
     }
 
     buildController(data) {
