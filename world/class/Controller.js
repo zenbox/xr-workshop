@@ -1,6 +1,7 @@
 import * as THREE from "three"
 
 import { OrbitControls } from "three/addons/controls/OrbitControls.js"
+import { XRButton } from "three/addons/webxr/XRButton.js"
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js"
 
 export default class Controller {
@@ -36,6 +37,24 @@ export default class Controller {
             // - - -
         } catch (error) {
             console.log("setOrbitControl error.", error.message, error.name)
+
+            return undefined
+        }
+    }
+
+    /**
+     * @desc    setXrButton
+     * @param   {type} desc
+     * @returns {boolean}
+     */
+    setXrButton() {
+        try {
+            // - - -
+            document.body.appendChild(XRButton.createButton(this.renderer))
+            return true
+            // - - -
+        } catch (error) {
+            console.log("setXrButton error.", error.message, error.name)
 
             return undefined
         }

@@ -11,7 +11,7 @@ class Ambient extends Light {
     constructor(scene) {
         super(scene)
 
-        this.ambient = new THREE.AmbientLight(0x404040)
+        this.ambient = new THREE.AmbientLight(0xffffff, 0.5)
 
         this.scene.add(this.ambient)
 
@@ -57,7 +57,7 @@ class Hemisphere extends Light {
 
         const skyColor = "skyblue" // helles Himmelblau
         const groundColor = "forestgreen" // Grün
-        const intensity = 5
+        const intensity = 0.25
 
         this.hemisphere = new THREE.HemisphereLight(
             skyColor,

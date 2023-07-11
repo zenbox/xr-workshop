@@ -13,6 +13,8 @@ export default class Studio {
         try {
             // - - -
             this.scene = new THREE.Scene()
+            this.scene.background = new THREE.Color(0x000033)
+
             return this.scene
             // - - -
         } catch (error) {
@@ -64,12 +66,16 @@ export default class Studio {
                 alpha: true,
                 logarithmicDepthBuffer: false,
             })
-            this.renderer.xr.enabled = true
             this.renderer.setSize(window.innerWidth, window.innerHeight)
+
+            this.renderer.xr.enabled = true
+
             this.renderer.shadowMap.enabled = true
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
             this.renderer.toneMapping = THREE.ACESFilmicToneMapping
             this.renderer.toneMappingExposure = 0.5
+
             this.renderer.setClearColor({ color: 0x334499, alpha: 0.95 })
 
             return this.renderer

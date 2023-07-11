@@ -84,7 +84,7 @@ function renderXrLoop() {
     renderer.render(scene, camera);
     bar.rotation.y += 0.01;
     bar.rotation.z += 0.01;
-    update();
+    spotlightUpdate()
 
     cleanIntersected();
 
@@ -107,7 +107,7 @@ function renderXrLoop() {
     var now = new Date(),
         secs = (now - lt) / 1000;
     if (secs > 1 / fps_update) {
-        update();
+        spotlightUpdate()
         renderer.render(scene, camera);
         frame += fps_movement * secs;
         frame %= frameMax;
@@ -402,7 +402,7 @@ var secs = 0,
     frameMax = 600,
     lt = new Date();
 
-var update = function () {
+var spotlightUpdate = function () {
     var per = Math.round(frame) / frameMax,
         bias = 1 - Math.abs(0.5 - per) / 0.5,
         radian = Math.PI * 2 * per,

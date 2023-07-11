@@ -19,7 +19,7 @@ console.clear()
 
 import Studio from "./class/Studio.js"
 import Light from "./class/Light.js"
-import Plot from "./class/Plot.js"
+import Plot from "./class/Stage.js"
 // import Sun from "./class/Sun.js";
 import Terrain from "./class/Terrain.js"
 import Fog from "./class/Fog.js"
