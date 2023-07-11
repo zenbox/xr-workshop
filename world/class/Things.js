@@ -152,7 +152,12 @@ class Groundwater extends Things {
     add() {
         try {
             // - - -
-            this.colorGeometry = new THREE.PlaneGeometry(this.width, this.depth, 5, 5)
+            this.colorGeometry = new THREE.PlaneGeometry(
+                this.width,
+                this.depth,
+                5,
+                5
+            )
             this.colorMaterial = new THREE.MeshStandardMaterial({
                 color: this.color,
             })
@@ -182,8 +187,10 @@ class Groundwater extends Things {
                 flowMap: this.flowMap,
             })
             this.mesh.rotation.set(-Math.PI / 2, 0, 0)
-            this.mesh.position.y = 0.10
+            this.mesh.position.y = 0.1
             this.scene.add(this.mesh)
+
+            return this.mesh
 
             // - - -
         } catch (error) {
@@ -194,4 +201,48 @@ class Groundwater extends Things {
     }
 }
 
-export { Things, Box, Sphere, House, Groundwater }
+class Atmosphere extends Things {
+    constructor(scene) {
+        super(scene)
+        this.scene = scene
+        return this.add()
+    }
+    /**
+     * @desc    add
+     * @param   {type} desc
+     * @returns {boolean}
+     */
+    add(a = undefined) {
+        try {
+            // - - -
+            const sun = new THREE.Vector3()
+            const sky = new Sky()
+
+            let sunElevation = 2 // Höhe über dem Horizont
+            let sunAzimuth = 210 // Winkel im Erdkreis (Breitengrad)
+            let phi = THREE.MathUtils.degToRad(90 - sunElevation)
+            let theta = THREE.MathUtils.degToRad(sunAzimuth)
+            
+            sun.setFromSphericalCoords(1, phi, theta)
+
+            sky.scale.setScalar(450000)
+            sky.material.uniforms["turbidity"].value = 10 // Trübung
+            sky.material.uniforms["rayleigh"].value = 0.5 // Streuung
+            sky.material.uniforms["mieCoefficient"].value = 0.15 // Hofbildung
+            sky.material.uniforms["mieDirectionalG"].value = 0.2
+            // sky.material.uniforms["exposure"] = renderer.toneMappingExposure
+            sky.material.uniforms["sunPosition"].value.copy(sun)
+
+            this.scene.add(sky)
+
+            return sky
+            // - - -
+        } catch (error) {
+            console.log("add error.", error.message, error.name)
+
+            return undefined
+        }
+    }
+}
+
+export { Things, Box, Sphere, House, Groundwater, Atmosphere }

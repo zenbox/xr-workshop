@@ -13,7 +13,7 @@ export default class Studio {
         try {
             // - - -
             this.scene = new THREE.Scene()
-            this.scene.background = new THREE.Color(0x000033)
+            this.scene.background = new THREE.Color(0x777777)
 
             return this.scene
             // - - -
@@ -64,13 +64,13 @@ export default class Studio {
             this.renderer = new THREE.WebGLRenderer({
                 antialias: true,
                 alpha: true,
-                logarithmicDepthBuffer: false,
+                logarithmicDepthBuffer: true,
             })
             this.renderer.setSize(window.innerWidth, window.innerHeight)
 
             this.renderer.xr.enabled = true
 
-            this.renderer.shadowMap.enabled = true
+            this.renderer.shadowMap.enabled = false
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
             this.renderer.toneMapping = THREE.ACESFilmicToneMapping
