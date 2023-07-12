@@ -3,6 +3,9 @@ import * as THREE from "three"
 import { Water } from "three/examples/jsm/objects/Water2.js"
 import { Sky } from "three/examples/jsm/objects/Sky.js"
 
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader"
+
 class Things {
     constructor(scene, material, conf = {}) {
         this.scene = scene
@@ -222,7 +225,7 @@ class Atmosphere extends Things {
             let sunAzimuth = 210 // Winkel im Erdkreis (Breitengrad)
             let phi = THREE.MathUtils.degToRad(90 - sunElevation)
             let theta = THREE.MathUtils.degToRad(sunAzimuth)
-            
+
             sun.setFromSphericalCoords(1, phi, theta)
 
             sky.scale.setScalar(450000)
@@ -245,4 +248,53 @@ class Atmosphere extends Things {
     }
 }
 
-export { Things, Box, Sphere, House, Groundwater, Atmosphere }
+class Model {
+    constructor(file, scene, options = { scale: 0.25, position: {x:0,y:0,z:0} }) {
+        this.options = options
+        this.init()
+        this.scene = scene
+        this.get(file)
+    }
+    init() {
+        this.loader = new GLTFLoader()
+        this.dracoLoader = new DRACOLoader()
+        this.dracoLoader.setDecoderPath(
+            "../node_modules/three/examples/jsm/libs/draco/gltf/"
+        )
+        this.loader.setDRACOLoader(this.dracoLoader)
+    }
+    async get(file) {
+        await this.loader.load(
+            file,
+            (gltf) => {
+                // called when the resource is loaded
+                let model = gltf.scene
+                this.gltf = gltf
+                model.scale.set(
+                    this.options.scale,
+                    this.options.scale,
+                    this.options.scale
+                )
+                model.position.set(
+                    this.options.position.x,
+                    this.options.position.y,
+                    this.options.position.z
+                )
+
+                this.scene.add(model)
+                this.mixer = new THREE.AnimationMixer(model)
+                this.mixer.clipAction(gltf.animations[0]).play()
+            },
+            (xhr) => {
+                // called while loading is progressing
+                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`)
+            },
+            (error) => {
+                // called when loading has errors
+                console.error("An error happened", error)
+            }
+        )
+    }
+}
+
+export { Things, Box, Sphere, House, Groundwater, Atmosphere, Model }

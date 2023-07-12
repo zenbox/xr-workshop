@@ -1,4 +1,5 @@
 import * as THREE from "three"
+const clock = new THREE.Clock()
 
 export default class Stage {
     constructor() {
@@ -28,7 +29,7 @@ export default class Stage {
      * @param   {type} desc
      * @returns {boolean}
      */
-    play() {
+    play(actors) {
         try {
             // - - -
             this.staff.forEach((that) => {
@@ -36,6 +37,13 @@ export default class Stage {
                 that.thing.rotation.y += that.rotate.y || 0
                 that.thing.rotation.z += that.rotate.z || 0
             })
+
+            const delta = clock.getDelta()
+            // if (actors.tokyo && typeof actors.tokyo.update === "function") actors.tokyo.update(delta)
+            if (actors.flamingo && typeof actors.flamingo.update === "function")
+                actors.flamingo.update(delta)
+            
+            
 
             return true
             // - - -

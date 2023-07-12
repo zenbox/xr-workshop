@@ -134,3 +134,19 @@ Mit Threejs können 3D-Welten und Objekte mit verhältnismäßig einfachen Mitte
   - Triangle
   - Quaternion
   - Vector2, Vector3, Vector4
+
+
+# XR
+## Grundlegendes
+- XR Button einfügen
+- Die Sache mit dem Standpunkt
+- Debuggen mit den developer tools
+## Renderer
+- Ergänzungen für den Renderer
+- animationFrame anpassen
+## Steuerung
+- Controller und Griffe hinzufügen
+- Tasten abfragen
+- Raycaster, Marker
+- Objekte bewegen
+- Teleportieren

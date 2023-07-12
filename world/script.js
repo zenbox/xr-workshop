@@ -253,6 +253,7 @@ window.onload = () => {
         camera: camera,
         renderer: renderer,
         cube: cubeMesh,
+        flamingo: flamingo
     }
 
     // - - - - - - - - - -

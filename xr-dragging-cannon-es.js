@@ -184,6 +184,7 @@ function addController1() {
 
     scene.add(controller1);
 }
+
 function addController2() {
     controller2 = renderer.xr.getController(1);
     controller2.addEventListener("selectstart", onTeleportStart);
@@ -195,6 +196,7 @@ function addController2() {
 
     scene.add(controller2);
 }
+
 function addGrip1() {
     let controllerGrip1 = renderer.xr.getControllerGrip(0);
     controllerGrip1.add(
@@ -202,6 +204,7 @@ function addGrip1() {
     );
     scene.add(controllerGrip1);
 }
+
 function addGrip2() {
     let controllerGrip2 = renderer.xr.getControllerGrip(1);
     controllerGrip2.add(
@@ -217,6 +220,7 @@ function addMarker() {
     );
     scene.add(marker);
 }
+
 // - - - - - - - - - -
 // DRAGGING
 function onDragStart(event) {
@@ -238,6 +242,7 @@ function onDragStart(event) {
 
     controller.userData.targetRayMode = event.data.targetRayMode;
 }
+
 function onDragEnd(event) {
     this.userData.isSelecting = false;
 
@@ -288,6 +293,7 @@ function getIntersections(controller) {
 
     return raycaster_drag.intersectObjects(group.children, false);
 }
+
 function intersectObjects(controller) {
     // Do not highlight in mobile-ar
 
@@ -312,12 +318,14 @@ function intersectObjects(controller) {
         line.scale.z = 5;
     }
 }
+
 function cleanIntersected() {
     while (intersected.length) {
         const object = intersected.pop();
         object.material.emissive.r = 0;
     }
 }
+
 // - - - - - - - - - -
 function addCubes() {
     for (let i = 0; i <= 10; i++) {
@@ -347,7 +355,6 @@ function addGroup() {
     group = new THREE.Group();
     scene.add(group);
 }
-
 function addFloor() {
     const geometry = new THREE.BoxGeometry(10, 0.1, 10);
     const material = new THREE.MeshBasicMaterial({
